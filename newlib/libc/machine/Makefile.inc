@@ -67,6 +67,9 @@ endif
 if HAVE_LIBC_MACHINE_KVX
 include %D%/kvx/Makefile.inc
 endif
+if HAVE_LIBC_MACHINE_LVX
+include %D%/lvx/Makefile.inc
+endif
 if HAVE_LIBC_MACHINE_M32C
 include %D%/m32c/Makefile.inc
 endif

@@ -74,6 +74,10 @@ case "${target}" in
 	AC_CONFIG_FILES([kvx-mbr/Makefile])
 	subdirs="$subdirs kvx-mbr"
 	;;
+  lvx-*-mbr*)
+	AC_CONFIG_FILES([lvx-mbr/Makefile])
+	subdirs="$subdirs lvx-mbr"
+	;;
   m32r-*-*)
 	AC_CONFIG_FILES([m32r/Makefile])
 	subdirs="$subdirs m32r"

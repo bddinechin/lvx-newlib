@@ -217,6 +217,13 @@ case "${host_cpu}" in
   lm32)
 	machine_dir=lm32
 	;;
+  lvx)
+	machine_dir=lvx
+	libm_machine_dir=lvx
+	default_newlib_io_long_long="yes"
+	default_newlib_io_c99_formats="yes"
+	have_init_fini=no
+	;;
   m32c)
 	machine_dir=m32c	
 	newlib_cflags="${newlib_cflags} -DPREFER_SIZE_OVER_SPEED -DSMALL_MEMORY"
@@ -538,6 +545,13 @@ case "${host}" in
 	sys_dir=cos
 	newlib_cflags="${newlib_cflags} -DGETREENT_PROVIDED"
 	newlib_cflags="${newlib_cflags} -D_NO_ISATTY -D_NO_GETENTROPY"
+	# crt0 is provided by libgloss.
+	have_crt0="no"
+	;;
+
+  lvx-*-mbr)
+	syscall_dir=syscalls
+	sys_dir=mbr
 	# crt0 is provided by libgloss.
 	have_crt0="no"
 	;;

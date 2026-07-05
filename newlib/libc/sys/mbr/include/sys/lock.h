@@ -34,12 +34,30 @@
 #define __SYS_LOCK_H__
 
 #include <stdint.h>
+
+#if defined(__lvx__)
+#include <mbr/lvx/atomic.h>
+#include <mbr/lvx/cache.h>
+#else
 #include <mppa_bare_runtime/kvx/atomic.h>
 #include <mppa_bare_runtime/kvx/cache.h>
+#endif
 
 /*
  * Lock routines for mppa bare runtime toolchain.
  */
+
+#if defined(__lvx__)
+
+#ifndef _LVX_RECURSIVE_NO_OWNER
+#define _LVX_RECURSIVE_NO_OWNER 0x0UL
+#endif /* _LVX_RECURSIVE_NO_OWNER  */
+
+struct __lock {
+  __lvx_recursive_lock_t lock;
+} __attribute__ ((aligned (_LVX_DCACHE_LINE_SIZE)));
+
+#else
 
 #ifndef _KVX_RECURSIVE_NO_OWNER
 #define _KVX_RECURSIVE_NO_OWNER 0x0UL
@@ -48,6 +66,8 @@
 struct __lock {
   __kvx_recursive_lock_t lock;
 } __attribute__ ((aligned (_KVX_DCACHE_LINE_SIZE)));
+
+#endif
 
 typedef struct __lock _LOCK_T;
 #define _LOCK_RECURSIVE_T _LOCK_T

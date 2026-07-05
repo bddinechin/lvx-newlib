@@ -2791,6 +2791,11 @@ case "${target}" in
 
 	subdirs="$subdirs kvx-mbr"
 	;;
+  lvx-*-mbr*)
+	ac_config_files="$ac_config_files lvx-mbr/Makefile"
+
+	subdirs="$subdirs lvx-mbr"
+	;;
   m32r-*-*)
 	ac_config_files="$ac_config_files m32r/Makefile"
 
@@ -6064,6 +6069,7 @@ do
     "i386/Makefile") CONFIG_FILES="$CONFIG_FILES i386/Makefile" ;;
     "kvx-cos/Makefile") CONFIG_FILES="$CONFIG_FILES kvx-cos/Makefile" ;;
     "kvx-mbr/Makefile") CONFIG_FILES="$CONFIG_FILES kvx-mbr/Makefile" ;;
+    "lvx-mbr/Makefile") CONFIG_FILES="$CONFIG_FILES lvx-mbr/Makefile" ;;
     "m32r/Makefile") CONFIG_FILES="$CONFIG_FILES m32r/Makefile" ;;
     "m68hc11/Makefile") CONFIG_FILES="$CONFIG_FILES m68hc11/Makefile" ;;
     "nds32/Makefile") CONFIG_FILES="$CONFIG_FILES nds32/Makefile" ;;

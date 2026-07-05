@@ -621,6 +621,8 @@ HAVE_LIBM_MACHINE_NDS32_FALSE
 HAVE_LIBM_MACHINE_NDS32_TRUE
 HAVE_LIBM_MACHINE_MIPS_FALSE
 HAVE_LIBM_MACHINE_MIPS_TRUE
+HAVE_LIBM_MACHINE_LVX_FALSE
+HAVE_LIBM_MACHINE_LVX_TRUE
 HAVE_LIBM_MACHINE_KVX_FALSE
 HAVE_LIBM_MACHINE_KVX_TRUE
 HAVE_LIBM_MACHINE_I386_FALSE
@@ -715,6 +717,8 @@ HAVE_LIBC_MACHINE_M32R_FALSE
 HAVE_LIBC_MACHINE_M32R_TRUE
 HAVE_LIBC_MACHINE_M32C_FALSE
 HAVE_LIBC_MACHINE_M32C_TRUE
+HAVE_LIBC_MACHINE_LVX_FALSE
+HAVE_LIBC_MACHINE_LVX_TRUE
 HAVE_LIBC_MACHINE_LM32_FALSE
 HAVE_LIBC_MACHINE_LM32_TRUE
 HAVE_LIBC_MACHINE_KVX_FALSE
@@ -5935,6 +5939,13 @@ else
   HAVE_LIBC_MACHINE_LM32_TRUE='#'
   HAVE_LIBC_MACHINE_LM32_FALSE=
 fi
+ if test "${machine_dir}" = lvx; then
+  HAVE_LIBC_MACHINE_LVX_TRUE=
+  HAVE_LIBC_MACHINE_LVX_FALSE='#'
+else
+  HAVE_LIBC_MACHINE_LVX_TRUE='#'
+  HAVE_LIBC_MACHINE_LVX_FALSE=
+fi
  if test "${machine_dir}" = m32c; then
   HAVE_LIBC_MACHINE_M32C_TRUE=
   HAVE_LIBC_MACHINE_M32C_FALSE='#'
@@ -6372,6 +6383,14 @@ fi
 else
   HAVE_LIBM_MACHINE_KVX_TRUE='#'
   HAVE_LIBM_MACHINE_KVX_FALSE=
+fi
+
+   if test "${libm_machine_dir}" = "lvx"; then
+  HAVE_LIBM_MACHINE_LVX_TRUE=
+  HAVE_LIBM_MACHINE_LVX_FALSE='#'
+else
+  HAVE_LIBM_MACHINE_LVX_TRUE='#'
+  HAVE_LIBM_MACHINE_LVX_FALSE=
 fi
 
    if test "${libm_machine_dir}" = "mips"; then
@@ -7889,6 +7908,10 @@ if test -z "${HAVE_LIBC_MACHINE_LM32_TRUE}" && test -z "${HAVE_LIBC_MACHINE_LM32
   as_fn_error $? "conditional \"HAVE_LIBC_MACHINE_LM32\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
+if test -z "${HAVE_LIBC_MACHINE_LVX_TRUE}" && test -z "${HAVE_LIBC_MACHINE_LVX_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_LIBC_MACHINE_LVX\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${HAVE_LIBC_MACHINE_M32C_TRUE}" && test -z "${HAVE_LIBC_MACHINE_M32C_FALSE}"; then
   as_fn_error $? "conditional \"HAVE_LIBC_MACHINE_M32C\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
@@ -8075,6 +8098,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_LIBM_MACHINE_KVX_TRUE}" && test -z "${HAVE_LIBM_MACHINE_KVX_FALSE}"; then
   as_fn_error $? "conditional \"HAVE_LIBM_MACHINE_KVX\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_LIBM_MACHINE_LVX_TRUE}" && test -z "${HAVE_LIBM_MACHINE_LVX_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_LIBM_MACHINE_LVX\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_LIBM_MACHINE_MIPS_TRUE}" && test -z "${HAVE_LIBM_MACHINE_MIPS_FALSE}"; then

@@ -33,19 +33,35 @@
 #include <stdlib.h>
 #include <sys/lock.h>
 
+#if defined(__lvx__)
+#include <mbr/lvx/cpu.h>
+#include <mbr/lvx/atomic.h>
+#include <mbr/lvx/cache.h>
+#define __get_cpu_id             __lvx_get_cpu_id
+#define __mb                     __lvx_mb
+#define __recursive_initlock_base  __lvx_recursive_initlock_base
+#define __recursive_trylock_base   __lvx_recursive_trylock_base
+#define __recursive_unlock_base    __lvx_recursive_unlock_base
+#else
 #include <mppa_bare_runtime/kvx/context.h>
 #include <mppa_bare_runtime/kvx/syscall.h>
 #include <mppa_bare_runtime/kvx/scall_no.h>
 #include <mppa_bare_runtime/kvx/registers.h>
+#define __get_cpu_id             __kvx_get_cpu_id
+#define __mb                     __kvx_mb
+#define __recursive_initlock_base  __kvx_recursive_initlock_base
+#define __recursive_trylock_base   __kvx_recursive_trylock_base
+#define __recursive_unlock_base    __kvx_recursive_unlock_base
+#endif
 
 static inline unsigned long long libc_get_id(void)
 {
-  return __kvx_get_cpu_id() + 1;
+  return __get_cpu_id() + 1;
 }
 
 static inline void libc_cache_flush(void)
 {
-  __kvx_mb();
+  __mb();
 }
 
 void __libc_lock_init(_LOCK_T *lock) __attribute__((alias ("__libc_lock_init_recursive")));
@@ -55,7 +71,7 @@ void __libc_lock_init_recursive(_LOCK_T *lock)
     /* Unable to allocate memory: trig a trap opcode. */
     asm("errop\n;;");
   }
-  __kvx_recursive_initlock_base(&(lock->lock));
+  __recursive_initlock_base(&(lock->lock));
 }
 
 void __libc_lock_close(_LOCK_T *lock) __attribute__((alias ("__libc_lock_close_recursive")));
@@ -85,7 +101,7 @@ int __libc_lock_try_acquire_recursive(_LOCK_T *lock)
   int res;
 
   myself = libc_get_id();
-  res = __kvx_recursive_trylock_base(&(lock->lock), myself);
+  res = __recursive_trylock_base(&(lock->lock), myself);
   if (res == 1)
     libc_cache_flush();
   return !res;
@@ -97,5 +113,5 @@ void __libc_lock_release_recursive(_LOCK_T *lock)
   unsigned long long myself;
   myself = libc_get_id();
   libc_cache_flush();
-  __kvx_recursive_unlock_base(&(lock->lock), myself);
+  __recursive_unlock_base(&(lock->lock), myself);
 }

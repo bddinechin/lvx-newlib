@@ -70,6 +70,9 @@ endif
 if HAVE_LIBM_MACHINE_KVX
 include %D%/machine/kvx/Makefile.inc
 endif
+if HAVE_LIBM_MACHINE_LVX
+include %D%/machine/lvx/Makefile.inc
+endif
 if HAVE_LIBM_MACHINE_MIPS
 include %D%/machine/mips/Makefile.inc
 endif
