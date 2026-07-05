@@ -17,7 +17,7 @@ This repository is **lvx-newlib**: a fork of GNU Newlib/Libgloss (imported whole
 
 See "Key Porting Gotchas" for how these interact with specific ported files.
 
-The companion repositories are `lvx-binutils` and `lvx-gcc` (siblings under `/home/bd3/LVX/`), which must be built before this newlib can be built/tested. See `/home/bd3/LVX/CLAUDE.md` for the overall LVX project context, target triple (`lvx-mbr`), and toolchain build instructions.
+The companion repositories are `lvx-binutils` and `lvx-gcc` (siblings under `/home/bd3/lvx-csw/`), which must be built before this newlib can be built/tested. See `/home/bd3/lvx-csw/CLAUDE.md` for the overall LVX project context, target triple (`lvx-mbr`), and toolchain build instructions.
 
 ## KVX Reference Source
 
@@ -72,7 +72,7 @@ Ported from `newlib/libm/machine/kvx/` and validated the same way: `configure --
 
 ### `libgloss/lvx-mbr/`
 
-**Partially ported** from `libgloss/kvx-mbr/` — 28 of the 37 source files, plus `Makefile.in` and `aclocal.m4` (the latter is vestigial in both `kvx-mbr` and `lvx-mbr`: no `configure.ac` consumes it, kept only for file-for-file parity). Confirmed working: `configure --target=lvx-mbr` (run from the *top-level* `/home/bd3/LVX/lvx-newlib/configure`, not `libgloss/configure` standalone — the standalone one doesn't know to use the cross tools) successfully generates `lvx-mbr/Makefile`.
+**Partially ported** from `libgloss/kvx-mbr/` — 28 of the 37 source files, plus `Makefile.in` and `aclocal.m4` (the latter is vestigial in both `kvx-mbr` and `lvx-mbr`: no `configure.ac` consumes it, kept only for file-for-file parity). Confirmed working: `configure --target=lvx-mbr` (run from the *top-level* `/home/bd3/lvx-csw/lvx-newlib/configure`, not `libgloss/configure` standalone — the standalone one doesn't know to use the cross tools) successfully generates `lvx-mbr/Makefile`.
 
 Ported (verbatim, no KVX-specific content):
 - `crt0.c`, `crti.c`, `crtn.c` (the latter two aren't actually wired into `CRT_FILES` even for `kvx-mbr` — mirrored deliberately, not fixed, same as the KVX-upstream `strlen.c`/`strcpy.c`/`strcmp.c` gap noted above)
@@ -83,7 +83,7 @@ Ported (verbatim, no KVX-specific content):
 
 **Deliberately NOT ported yet** — each depends on an LVX architecture detail that plain KVX→LVX renaming can't invent, and needs a real design decision (same category as the `sys/mbr/lock.h` blocker, just larger in scope):
 - `linker_scripts/bare.ld` + `memory_map.ld` — hardcode KVX's physical memory map (`internal_mem` at `0x0`/4M, `dsu` at `0xA46000`, `ddr` at `0x100000000`), boot address, and exception-vector-table offsets (debug/trap/interrupt/syscall at fixed KVX offsets). No LVX memory map or exception vector layout is defined anywhere in this project yet. (`bare_extern.ld` is trivial and could be ported, but is pointless without the other two.)
-- `asm_syscalls.S`, plus the `open.c`/`fcntl.c` wrappers that need the same header — the actual `scall __NR_*` syscall trap uses numbers from `mppa_bare_runtime/kvx/scall_no.h`, a proprietary numbering agreed upon by the KVX ISS/simulator. There's no LVX ISS yet (per `/home/bd3/LVX/CLAUDE.md`) to define an equivalent.
+- `asm_syscalls.S`, plus the `open.c`/`fcntl.c` wrappers that need the same header — the actual `scall __NR_*` syscall trap uses numbers from `mppa_bare_runtime/kvx/scall_no.h`, a proprietary numbering agreed upon by the KVX ISS/simulator. There's no LVX ISS yet (per `/home/bd3/lvx-csw/CLAUDE.md`) to define an equivalent.
 - `timer.c`, `times.c`, `gettimeofday.c`, `nanosleep.c` (and transitively `sleep.c`/`usleep.c`, which just call `__kvx_nanosleep`) — read KVX hardware timer/counter SFRs via `mppa_bare_runtime/kvx/{timer,cpu,timestamp,diagnostic,io,power_ctrl}.h`. Same story: no LVX equivalent register set is defined.
 
 Once an LVX syscall ABI and memory map exist, port these the same way as everything else here, add their objects back into `Makefile.in`'s `SYS_OBJS`, and un-skip the `linker_scripts/*.ld` install loop.
@@ -105,7 +105,7 @@ These dispatch points were updated to mirror the existing `kvx` entries:
 
 The exact-version autotools built for this (autoconf 2.69 already on the system as `autoconf2.69`/etc.; automake 1.15.1 built from the upstream tarball) live at `/tmp/autotools269bin` and `/tmp/autotools-local/bin` in past sessions — outside the repo, so a fresh session will need to rebuild automake 1.15.1 from source again (`https://ftp.gnu.org/gnu/automake/automake-1.15.1.tar.gz`, plain `./configure --prefix=... && make && make install`, quick since it's Perl/shell) before regenerating `configure`/`Makefile.in` again.
 
-`libgloss/configure.ac` — added an `lvx-*-mbr*` case (`AC_CONFIG_FILES([lvx-mbr/Makefile])`, `subdirs="$subdirs lvx-mbr"`) mirroring `kvx-*-mbr*` → `kvx-mbr/Makefile`. `libgloss/configure` regenerated with the same autoconf 2.69 (no automake involved here — `libgloss` has no `Makefile.am`, just plain `Makefile.in` + `AC_CONFIG_FILES`); diff was minimal (just the new case + its `CONFIG_FILES` entry). Note: configuring `--target=lvx-mbr` at the `libgloss/configure` level directly (rather than the top-level combined-tree `configure`) picks the *host* `gcc`, not `lvx-mbr-gcc` — always drive it from `/home/bd3/LVX/lvx-newlib/configure --target=lvx-mbr ... ` (as with newlib) and build via `make all-target-libgloss`, or compile individual files directly with `lvx-mbr-gcc` to sidestep the fact that `all-target-libgloss` depends on `all-target-newlib` succeeding first (which it doesn't fully, since ~10% of newlib still fails on the unrelated pre-existing `lvx-gcc` bugs described at the top of this file).
+`libgloss/configure.ac` — added an `lvx-*-mbr*` case (`AC_CONFIG_FILES([lvx-mbr/Makefile])`, `subdirs="$subdirs lvx-mbr"`) mirroring `kvx-*-mbr*` → `kvx-mbr/Makefile`. `libgloss/configure` regenerated with the same autoconf 2.69 (no automake involved here — `libgloss` has no `Makefile.am`, just plain `Makefile.in` + `AC_CONFIG_FILES`); diff was minimal (just the new case + its `CONFIG_FILES` entry). Note: configuring `--target=lvx-mbr` at the `libgloss/configure` level directly (rather than the top-level combined-tree `configure`) picks the *host* `gcc`, not `lvx-mbr-gcc` — always drive it from `/home/bd3/lvx-csw/lvx-newlib/configure --target=lvx-mbr ... ` (as with newlib) and build via `make all-target-libgloss`, or compile individual files directly with `lvx-mbr-gcc` to sidestep the fact that `all-target-libgloss` depends on `all-target-newlib` succeeding first (which it doesn't fully, since ~10% of newlib still fails on the unrelated pre-existing `lvx-gcc` bugs described at the top of this file).
 
 ## Key Porting Gotchas
 
@@ -113,19 +113,19 @@ The exact-version autotools built for this (autoconf 2.69 already on the system 
 - **Do not carry over 32-bit assumptions.** KVX has kv3-1/kv3-2 32-bit-capable variants; LVX is LP64 only, so any `#ifdef`/asm that branches on word size should collapse to the 64-bit path only.
 - **KVX-specific compiler builtins** (`__builtin_kvx_*`) rename mechanically to `__builtin_lvx_*` — every one checked so far exists in `lvx-gcc/gcc/config/lvx/lvx-builtins.def` with an identical signature. The blocker is runtime, not naming: see the `lvx_expand_builtin` ICE noted above.
 - **`asm.h` and `.S` files use KVX assembly mnemonics/directives** — don't assume syntax compatibility, but in practice every mnemonic checked against `lvx-binutils/opcodes/lvx-opc.c` so far (register loads/stores of all widths, `loopdo`, conditional move/store, etc.) exists unchanged; the one confirmed KVX-only casualty is `dzerol` (kv3-1's cache-zeroing instruction). Always assemble-test with `lvx-mbr-gcc -c foo.S` (not bare `lvx-mbr-as`, which skips the required cpp preprocessing pass over `#include`/`#define`/`#if`) rather than assuming syntax compatibility.
-- **Register/ABI details**: the LVX ABI is declared identical to KVX's kv4-v1 ABI (see `/home/bd3/LVX/CLAUDE.md`), so calling conventions in `crt0.c`, `setjmp.S`, and syscall stubs port with minimal change — confirmed for `setjmp.S`/`longjmp.S`, which ported byte-for-byte apart from a comment.
+- **Register/ABI details**: the LVX ABI is declared identical to KVX's kv4-v1 ABI (see `/home/bd3/lvx-csw/CLAUDE.md`), so calling conventions in `crt0.c`, `setjmp.S`, and syscall stubs port with minimal change — confirmed for `setjmp.S`/`longjmp.S`, which ported byte-for-byte apart from a comment.
 - Every KVX/Kalray source file carries a Kalray copyright/license header; preserve or adapt these headers per your organization's policy when creating `lvx` counterparts rather than silently dropping them.
 - **A "generic, shared" sys dir isn't necessarily machine-agnostic in content** — `libc/sys/mbr` is wired generically at the build-system level but its `lock.h` hardcodes KVX atomic/cache headers. Don't assume a shared dir needs zero changes; check its actual `#include`s.
 - **`libc/machine/*` and `libm/machine/*` are wired into the build differently** even though they look parallel: `libc/machine/<name>/` is its own autoconf/automake subproject (`Makefile.am` + `configure.ac` + generated `configure`/`aclocal.m4`), while `libm/machine/<name>/` is just a `Makefile.inc` pulled in by `libm/Makefile.inc`'s own `if HAVE_LIBM_MACHINE_*` guard — don't copy the libc pattern (Makefile.am/configure.ac) into a new libm machine dir, it doesn't need one.
 
 ## Building and Testing
 
-`--target=lvx-mbr` is wired up and configures successfully (confirmed working end-to-end with the toolchain installed at `/home/bd3/LVX/lvx-toolchain/bin/lvx-mbr-*`):
+`--target=lvx-mbr` is wired up and configures successfully (confirmed working end-to-end with the toolchain installed at `/home/bd3/lvx-csw/lvx-toolchain/bin/lvx-mbr-*`):
 
 ```bash
-export PATH=/home/bd3/LVX/lvx-toolchain/bin:$PATH   # lvx-mbr-gcc/-as/-ar/-ranlib etc.
+export PATH=/home/bd3/lvx-csw/lvx-toolchain/bin:$PATH   # lvx-mbr-gcc/-as/-ar/-ranlib etc.
 mkdir build-newlib && cd build-newlib
-/home/bd3/LVX/lvx-newlib/configure --target=lvx-mbr --prefix=<toolchain-prefix>
+/home/bd3/lvx-csw/lvx-newlib/configure --target=lvx-mbr --prefix=<toolchain-prefix>
 make -k -j$(nproc)   # -k (keep-going) matters: ~10% of files still fail on pre-existing
                      # lvx-gcc bugs unrelated to this repo (see the callout at the top
                      # of this file) - independent targets still build regardless
@@ -138,4 +138,4 @@ For a trustworthy read on *which* files fail and why, prefer a non-parallel `mak
 
 To build `libgloss` for `lvx-mbr`, configure the same top-level tree the same way and target `all-target-libgloss` instead of (or in addition to) `all-target-newlib` — note `all-target-libgloss` depends on `all-target-newlib` completing first, and since ~10% of newlib still fails on the unrelated `lvx-gcc` bugs above, a strict `all-target-libgloss` run won't fully succeed either. To validate just the ported `libgloss/lvx-mbr` files without waiting on that, compile them directly: `lvx-mbr-gcc -march=lvx-1 -O2 -I <path-to>/newlib/libc/include -c <file>.c`.
 
-There is no LVX-specific test suite in this repo yet; testing a ported routine means building it into a static lib against the `lvx-mbr` newlib, linking a test program with the `lvx-gcc`/`lvx-binutils` toolchain, and running it under the LVX ISS (see `/home/bd3/LVX/CLAUDE.md` — the ISS is a planned sibling component, not yet present).
+There is no LVX-specific test suite in this repo yet; testing a ported routine means building it into a static lib against the `lvx-mbr` newlib, linking a test program with the `lvx-gcc`/`lvx-binutils` toolchain, and running it under the LVX ISS (see `/home/bd3/lvx-csw/CLAUDE.md` — the ISS is a planned sibling component, not yet present).
