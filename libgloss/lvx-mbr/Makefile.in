@@ -62,16 +62,18 @@ OBJCOPY = `if [ -f ${objroot}/../binutils/objcopy ] ; \
 
 GLOSS_OBJS =
 
-# NOTE: unlike kvx-mbr, this list omits fcntl.o, gettimeofday.o, open.o,
-# asm_syscalls.o, nanosleep.o, times.o, sleep.o, usleep.o. Those source
-# files haven't been ported yet: they depend on mppa_bare_runtime/kvx/*
-# headers (syscall numbering ABI, timer/counter SFR access) that have no
-# LVX equivalent defined yet. Add them back here once lvx-mbr/asm_syscalls.S
-# and friends exist.
-SYS_OBJS = access.o chdir.o chmod.o close.o dup.o dup2.o exit.o \
-	fstat.o getpagesize.o isatty.o link.o lseek.o \
-	mkdir.o read.o rmdir.o sbrk.o stat.o unlink.o write.o \
-	mkfifo.o
+# NOTE: unlike kvx-mbr, this list still omits timer.o: KVX's own timer.c is
+# never wired into kvx-mbr's SYS_OBJS either (dead code even upstream), so
+# that gap is mirrored deliberately here, not fixed - see timer.c's own
+# comment. Everything else that was missing (the syscall ABI and
+# timer/counter SFR access files) has been ported, using KVX's exact
+# syscall numbers/S_* flag values (mppa_bare_runtime/lvx/scall_no.h) and
+# confirmed-identical timer SFR layout (mppa_bare_runtime/lvx/registers.h,
+# cross-checked against lvx-mds's generated Register.table/RegField.table).
+SYS_OBJS = access.o chdir.o chmod.o close.o dup.o dup2.o  exit.o fcntl.o \
+	fstat.o getpagesize.o gettimeofday.o isatty.o link.o lseek.o \
+	mkdir.o open.o read.o rmdir.o sbrk.o stat.o unlink.o write.o \
+	asm_syscalls.o mkfifo.o nanosleep.o times.o sleep.o usleep.o
 
 ENOSYS_STUB_OBJS = execve.o fork.o kill.o getpid.o wait.o
 
