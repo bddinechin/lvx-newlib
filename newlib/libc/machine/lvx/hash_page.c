@@ -3,7 +3,7 @@
  *      The Regents of the University of California.  All rights reserved.
  *
  * Copyright 2020
- * Kalray Inc. All rights reserved.
+ * Liesme Tech. All rights reserved.
  *
  * This code is derived from software contributed to Berkeley by
  * Margo Seltzer.
